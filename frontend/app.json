@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "ZenRadius",
+    "slug": "frontend",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "zenradius",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#070C1A",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.emergent.zenradiusmobile.ucrj1g"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#070C1A"
+      },
+      "package": "com.emergent.zenradiusmobile.ucrj1g"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-image.png",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#070C1A"
+        }
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-secure-store",
+      "expo-web-browser",
+      "expo-status-bar",
+      "@react-native-vector-icons/material-design-icons"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
