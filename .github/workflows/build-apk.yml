@@ -59,9 +59,8 @@ jobs:
           BUILD_ID="${{ steps.build_id.outputs.build_id }}"
           echo "Downloading APK for build ID: $BUILD_ID"
           mkdir -p ./apk-downloads
-          cd ./apk-downloads
-          eas build:download --id "$BUILD_ID" --path ./zenradius.apk
-          ls -lh ./
+          eas build:download --id "$BUILD_ID" --output ./apk-downloads/zenradius.apk
+          ls -lh ./apk-downloads/
 
       - name: Upload APK to GitHub Artifacts
         uses: actions/upload-artifact@v4
@@ -70,18 +69,3 @@ jobs:
           path: frontend/apk-downloads/zenradius.apk
           retention-days: 30
           if-no-files-found: error
-
-      - name: Create Release Info
-        run: |
-          echo "✅ APK Build Berhasil!" > release-info.txt
-          echo "📦 Nama File: zenradius.apk" >> release-info.txt
-          echo "📥 Download: GitHub Actions → Artifacts" >> release-info.txt
-          echo "⏰ Build Time: $(date)" >> release-info.txt
-          cat release-info.txt
-
-      - name: Upload Build Info
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-info
-          path: frontend/release-info.txt
-          retention-days: 30
