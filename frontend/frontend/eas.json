@@ -6,14 +6,7 @@
     "production": {
       "android": {
         "buildType": "apk",
-        "keystore": {
-          "type": "project-managed"
-        }
-      }
-    },
-    "preview": {
-      "android": {
-        "buildType": "apk"
+        "distribution": "internal"
       }
     }
   }
