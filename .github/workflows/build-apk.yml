@@ -33,7 +33,6 @@ jobs:
           eas build \
             --platform android \
             --profile production \
-            --type apk \
             --non-interactive \
             --clear-cache \
             --wait
@@ -57,6 +56,7 @@ jobs:
           echo "Downloading APK from: $DOWNLOAD_URL"
           mkdir -p ./apk-downloads
           curl -L -o ./apk-downloads/zenradius.apk "$DOWNLOAD_URL"
+          file ./apk-downloads/zenradius.apk
           ls -lh ./apk-downloads/
 
       - name: Upload APK to GitHub Artifacts
