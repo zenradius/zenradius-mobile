@@ -1,0 +1,87 @@
+name: Build Android APK with EAS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Initialize EAS project
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          eas init --id bc98d7c9-1d42-4176-8496-15689684b480 --non-interactive
+
+      - name: Build Android APK with EAS
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          eas build \
+            --platform android \
+            --profile production \
+            --non-interactive \
+            --clear-cache \
+            --wait
+
+      - name: Get Latest Build ID
+        id: build_id
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          BUILD_ID=$(eas build:list --platform android --limit 1 --json | jq -r '.[0].id')
+          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+          echo "Latest Build ID: $BUILD_ID"
+
+      - name: Download APK from EAS
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          BUILD_ID="${{ steps.build_id.outputs.build_id }}"
+          echo "Downloading APK for build ID: $BUILD_ID"
+          mkdir -p ./apk-downloads
+          cd ./apk-downloads
+          eas build:download --id "$BUILD_ID" --path ./zenradius.apk
+          ls -lh ./
+
+      - name: Upload APK to GitHub Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: zenradius-apk
+          path: frontend/apk-downloads/zenradius.apk
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Create Release Info
+        run: |
+          echo "✅ APK Build Berhasil!" > release-info.txt
+          echo "📦 Nama File: zenradius.apk" >> release-info.txt
+          echo "📥 Download: GitHub Actions → Artifacts" >> release-info.txt
+          echo "⏰ Build Time: $(date)" >> release-info.txt
+          cat release-info.txt
+
+      - name: Upload Build Info
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-info
+          path: frontend/release-info.txt
+          retention-days: 30
