@@ -43,23 +43,25 @@ jobs:
             --clear-cache \
             --wait
 
-      - name: Get Latest Build ID
-        id: build_id
+      - name: Get Latest Build ID and Download URL
+        id: build_info
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          BUILD_ID=$(eas build:list --platform android --limit 1 --json | jq -r '.[0].id')
+          BUILD_JSON=$(eas build:list --platform android --limit 1 --json)
+          BUILD_ID=$(echo "$BUILD_JSON" | jq -r '.[0].id')
+          DOWNLOAD_URL=$(echo "$BUILD_JSON" | jq -r '.[0].artifacts.buildUrl')
           echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
-          echo "Latest Build ID: $BUILD_ID"
+          echo "download_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+          echo "Build ID: $BUILD_ID"
+          echo "Download URL: $DOWNLOAD_URL"
 
       - name: Download APK from EAS
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          BUILD_ID="${{ steps.build_id.outputs.build_id }}"
-          echo "Downloading APK for build ID: $BUILD_ID"
+          DOWNLOAD_URL="${{ steps.build_info.outputs.download_url }}"
+          echo "Downloading APK from: $DOWNLOAD_URL"
           mkdir -p ./apk-downloads
-          eas build:download --id "$BUILD_ID" --output ./apk-downloads/zenradius.apk
+          curl -L -o ./apk-downloads/zenradius.apk "$DOWNLOAD_URL"
           ls -lh ./apk-downloads/
 
       - name: Upload APK to GitHub Artifacts
@@ -69,3 +71,18 @@ jobs:
           path: frontend/apk-downloads/zenradius.apk
           retention-days: 30
           if-no-files-found: error
+
+      - name: Create Release Info
+        run: |
+          echo "✅ APK Build Berhasil!" > release-info.txt
+          echo "📦 Nama File: zenradius.apk" >> release-info.txt
+          echo "📥 Download: GitHub Actions → Artifacts" >> release-info.txt
+          echo "⏰ Build Time: $(date)" >> release-info.txt
+          cat release-info.txt
+
+      - name: Upload Build Info
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-info
+          path: frontend/release-info.txt
+          retention-days: 30
