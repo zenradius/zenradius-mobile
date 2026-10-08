@@ -26,6 +26,12 @@ jobs:
       - name: Install EAS CLI
         run: npm install -g eas-cli
 
+      - name: Initialize EAS project
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          eas init --id bc98d7c9-1d42-4176-8496-15689684b480 --non-interactive
+
       - name: Build Android APK with EAS
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
@@ -43,6 +49,8 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           BUILD_JSON=$(eas build:list --platform android --limit 1 --json)
+          echo "Build JSON:"
+          echo "$BUILD_JSON" | jq '.'
           BUILD_ID=$(echo "$BUILD_JSON" | jq -r '.[0].id')
           DOWNLOAD_URL=$(echo "$BUILD_JSON" | jq -r '.[0].artifacts.buildUrl')
           echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
